@@ -1,0 +1,17 @@
+{% load static %}
+   <!DOCTYPE html>
+   <html>
+   <head>
+       <title>{% if form.instance.id %}Edit Post{% else %}Create Post{% endif %}</title>
+       <link rel="stylesheet" href="{% static 'blog/css/style.css' %}">
+   </head>
+   <body>
+       <h1>{% if form.instance.id %}Edit Post{% else %}Create Post{% endif %}</h1>
+       <form method="post">
+           {% csrf_token %}
+           {{ form.as_p }}
+           <button type="submit">Save</button>
+       </form>
+       <a href="{% url 'home' %}">Back to Home</a>
+   </body>
+   </html>
