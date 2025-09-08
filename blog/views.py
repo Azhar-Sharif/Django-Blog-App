@@ -1,8 +1,15 @@
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from datetime import datetime
+from django.contrib import messages
+from django.contrib.auth import authenticate, login
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from .models import Post
 from .forms import PostForm
+from .forms import PostForm, UserCreationForm
+
+
 
 def hello_view(request):
     return HttpResponse("Hello Django")
@@ -16,16 +23,21 @@ def home_view(request):
     }
     return render(request, 'blog/home.html', context)
 
+
+@login_required
 def post_create(request):
     if request.method == 'POST':
         form = PostForm(request.POST)
         if form.is_valid():
-            form.save()
+            post = form.save(commit=False)
+            post.author = request.user
+            post.save()
             return redirect('home')
     else:
         form = PostForm()
     return render(request, 'blog/post_form.html', {'form': form})
 
+@login_required
 def post_update(request, post_id):
     post = get_object_or_404(Post, id=post_id)
     if request.method == 'POST':
@@ -37,9 +49,22 @@ def post_update(request, post_id):
         form = PostForm(instance=post)
     return render(request, 'blog/post_form.html', {'form': form})
 
+
+@login_required
 def post_delete(request, post_id):
     post = get_object_or_404(Post, id=post_id)
     if request.method == 'POST':
         post.delete()
         return redirect('home')
     return render(request, 'blog/post_delete.html', {'post': post})
+
+
+def signup(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('login')
+    else:
+        form = UserCreationForm()
+    return render(request, 'blog/signup.html', {'form': form})
