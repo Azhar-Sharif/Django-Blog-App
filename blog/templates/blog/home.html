@@ -8,5 +8,17 @@
    <body>
        <h1>Welcome, {{ name|upper }}!</h1>
        <p>Today's date: {{ current_date|date:"F j, Y" }}</p>
-   </body>
+    <h2>Blog Posts</h2>
+    <ul>
+        {% for post in posts %}
+            <li>
+                <strong>{{ post.title }}</strong>: {{ post.body|truncatewords:10 }}
+                <br>
+                
+            </li>
+        {% empty %}
+            <li>No posts available.</li>
+        {% endfor %}
+    </ul>
+    </body>
    </html>
