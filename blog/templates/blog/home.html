@@ -14,7 +14,14 @@
             <li>
                 <strong>{{ post.title }}</strong>: {{ post.body|truncatewords:10 }}
                 <br>
-                
+            <h3>Comments</h3>
+                <ul>
+                    {% for comment in post.comments.all %}
+                        <li>{{ comment.content }}</li>
+                    {% empty %}
+                        <li>No comments yet.</li>
+                    {% endfor %}
+                </ul>    
             </li>
         {% empty %}
             <li>No posts available.</li>
