@@ -1,0 +1,12 @@
+{% load static %}
+   <!DOCTYPE html>
+   <html>
+   <head>
+       <title>Django Styled Page</title>
+       <link rel="stylesheet" href="{% static 'blog/css/style.css' %}">
+   </head>
+   <body>
+       <h1>Welcome, {{ name|upper }}!</h1>
+       <p>Today's date: {{ current_date|date:"F j, Y" }}</p>
+   </body>
+   </html>
