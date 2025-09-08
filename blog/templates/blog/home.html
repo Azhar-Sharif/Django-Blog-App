@@ -1,31 +1,40 @@
 {% load static %}
-   <!DOCTYPE html>
-   <html>
-   <head>
-       <title>Django Styled Page</title>
-       <link rel="stylesheet" href="{% static 'blog/css/style.css' %}">
-   </head>
-   <body>
-       <h1>Welcome, {{ name|upper }}!</h1>
-       <p>Today's date: {{ current_date|date:"F j, Y" }}</p>
-    <h2>Blog Posts</h2>
-    <ul>
-        {% for post in posts %}
-            <li>
-                <strong>{{ post.title }}</strong>: {{ post.body|truncatewords:10 }}
-                <br>
-            <h3>Comments</h3>
-                <ul>
-                    {% for comment in post.comments.all %}
-                        <li>{{ comment.content }}</li>
-                    {% empty %}
-                        <li>No comments yet.</li>
-                    {% endfor %}
-                </ul>    
-            </li>
-        {% empty %}
-            <li>No posts available.</li>
-        {% endfor %}
-    </ul>
-    </body>
-   </html>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Blog Home</title>
+    <link rel="stylesheet" href="{% static 'blog/css/style.css' %}">
+</head>
+<body>
+    <h1>Welcome, {{ name|upper }}</h1>
+    {% if user.is_authenticated %}
+        <p>Logged in as {{ user.username }} | <form action="{% url 'logout' %}" method="post" style="display:inline;">
+      {% csrf_token %}
+      <button type="submit">Logout</button>
+  </form></p>
+        <a href="{% url 'post_create' %}">Create New Post</a>
+    {% else %}
+        <p><a href="{% url 'login' %}">Login</a> | <a href="{% url 'signup' %}">Sign Up</a></p>
+    {% endif %}
+    <h2>Posts</h2>
+    {% for post in posts %}
+        <div>
+            <h3>{{ post.title }}</h3>
+            <p>By {{ post.author.username }}</p>
+            <p>{{ post.body }}</p>
+            {% if user.is_authenticated and user == post.author %}
+                <a href="{% url 'post_update' post.id %}">Edit</a>
+                <a href="{% url 'post_delete' post.id %}">Delete</a>
+            {% endif %}
+            <h4>Comments</h4>
+            {% for comment in post.comments.all %}
+                <p>{{ comment.content }}</p>
+            {% empty %}
+                <p>No comments yet.</p>
+            {% endfor %}
+        </div>
+    {% empty %}
+        <p>No posts available.</p>
+    {% endfor %}
+</body>
+</html>

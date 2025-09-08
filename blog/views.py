@@ -1,15 +1,9 @@
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
-from datetime import datetime
-from django.contrib import messages
-from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
+from datetime import datetime
 from .models import Post
-from .forms import PostForm
 from .forms import PostForm, UserCreationForm
-
-
 
 def hello_view(request):
     return HttpResponse("Hello Django")
@@ -18,11 +12,9 @@ def home_view(request):
     posts = Post.objects.all().prefetch_related('comments')
     context = {
         'name': 'User',
-        'current_date': datetime.now(),
         'posts': posts,
     }
     return render(request, 'blog/home.html', context)
-
 
 @login_required
 def post_create(request):
@@ -40,6 +32,8 @@ def post_create(request):
 @login_required
 def post_update(request, post_id):
     post = get_object_or_404(Post, id=post_id)
+    if post.author != request.user:
+        return redirect('home')
     if request.method == 'POST':
         form = PostForm(request.POST, instance=post)
         if form.is_valid():
@@ -49,15 +43,15 @@ def post_update(request, post_id):
         form = PostForm(instance=post)
     return render(request, 'blog/post_form.html', {'form': form})
 
-
 @login_required
 def post_delete(request, post_id):
     post = get_object_or_404(Post, id=post_id)
+    if post.author != request.user:
+        return redirect('home')
     if request.method == 'POST':
         post.delete()
         return redirect('home')
     return render(request, 'blog/post_delete.html', {'post': post})
-
 
 def signup(request):
     if request.method == 'POST':
