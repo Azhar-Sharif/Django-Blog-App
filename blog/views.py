@@ -3,16 +3,15 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from datetime import datetime
 from .models import Post
-from .forms import PostForm, UserCreationForm
+from .forms import PostForm, UserCreationForm,CommentForm
 
-def hello_view(request):
-    return HttpResponse("Hello Django")
 
 def home_view(request):
     posts = Post.objects.all().prefetch_related('comments')
+    comment_form = CommentForm()
     context = {
-        'name': 'User',
         'posts': posts,
+        'comment_form': comment_form,
     }
     return render(request, 'blog/home.html', context)
 
@@ -62,3 +61,16 @@ def signup(request):
     else:
         form = UserCreationForm()
     return render(request, 'blog/signup.html', {'form': form})
+
+def comment_create(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+    if request.method == 'POST':
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.post = post
+            if request.user.is_authenticated:
+                comment.author = request.user
+            comment.save()
+            return redirect('home')
+    return redirect('home')
